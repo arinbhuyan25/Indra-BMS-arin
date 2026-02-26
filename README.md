@@ -143,5 +143,5 @@ EV-BIC/
 
 
 
-## 🚀 Live Demo
+## Live Demo
 [Indra-BMS](https://indrabms.netlify.app/)
