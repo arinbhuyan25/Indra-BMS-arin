@@ -2,7 +2,7 @@
 
 > LM35 removed. DS18B20 is the sole temperature sensor.
 
----
+
 
 ## Components Used
 
@@ -17,7 +17,7 @@
 | R1, R2 (10kΩ each) | Battery voltage divider for AIN0 | — |
 | 4.7kΩ | DS18B20 1-Wire pull-up | — |
 
----
+
 
 ## Power Rails
 
@@ -26,7 +26,7 @@
 | 3.3V | Board **3.3V** | Breadboard **+ rail** |
 | GND  | Board **GND** | Breadboard **− rail** |
 
----
+
 
 ## INA219 (I2C @ 0x40)
 
@@ -46,7 +46,7 @@ Battery B-  ──→  GND
 | INA219 VIN+ | **TP4056 B+** | INA219 VIN+ |
 | INA219 VIN- | INA219 VIN- | **Battery B+ terminal** |
 
----
+
 
 ## Battery Voltage Divider → ADS1015 AIN0
 
@@ -66,7 +66,7 @@ Battery B+  ──[R1 10kΩ]──┬──→  ADS1015 AIN0
 | R2 (10kΩ) | Junction node | − rail (GND) |
 | Wire | Junction node | **ADS1015 AIN0** header pin |
 
----
+
 
 ## DS18B20 Temperature Sensor (1-Wire @ GPIO4)
 
@@ -84,7 +84,7 @@ Hold flat face toward you: **LEFT = GND, MIDDLE = DATA, RIGHT = VDD**
 | DS18B20 DATA | Board **GPIO4** | DS18B20 Pin 2 (middle) |
 | 4.7kΩ pull-up | + rail | DS18B20 DATA row |
 
----
+
 
 ## TP4056
 
@@ -93,7 +93,7 @@ Hold flat face toward you: **LEFT = GND, MIDDLE = DATA, RIGHT = VDD**
 | B+ | TP4056 B+ | → INA219 VIN+ (see above) |
 | B- | Battery B- | − rail / Battery negative |
 
----
+
 
 ## I2C Bus Summary
 
@@ -106,7 +106,7 @@ Both devices share `SDA` and `SCL`:
 
 > Do **not** add external I2C pull-up resistors — the board already has them on-PCB.
 
----
+
 
 ## Pre-Power Checklist
 
@@ -120,7 +120,7 @@ Both devices share `SDA` and `SCL`:
 | Resistance: R1+R2 across B+ to GND | ~20kΩ |
 | INA219 VIN+ to VIN- | ~0Ω (shunt — correct) |
 
----
+
 
 ## Expected Serial Output (v0.4)
 
