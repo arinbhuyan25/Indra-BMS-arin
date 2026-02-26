@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.vite/
+*.local
+.env
+.env.*
+temp_docx/
+doc_content.txt
+.agent/
