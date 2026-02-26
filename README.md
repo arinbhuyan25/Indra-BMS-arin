@@ -138,9 +138,10 @@ EV-BIC/
 | Charts | Recharts |
 | Fonts | Orbitron, Plus Jakarta Sans |
 | Hardware bridge | Web Serial API |
+| Firmware | C++ (Arduino / THEJAS32 RISC-V) |
+| Signal processing | Savitzky–Golay filter (5-point, order 2) |
+
 
 
 ## 🚀 Live Demo
 [Indra-BMS](https://indrabms.netlify.app/)
-| Firmware | C++ (Arduino / THEJAS32 RISC-V) |
-| Signal processing | Savitzky–Golay filter (5-point, order 2) |
