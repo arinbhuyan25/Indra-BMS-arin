@@ -90,7 +90,7 @@ If COM11 does not appear:
 
 ## Step 6 — Upload & Verify
 
-1. Open the sketch: `firmware/indra_bms_serial_test/indra_bms_serial_test.ino`
+1. Open the sketch: `firmware/indra_bms_circuit_test/indra_bms_serial_test.ino`
 2. **If using XMODEM:** Click **Upload** (→ button) or `Ctrl+U`
 3. **If using FLASHER:** Use **Sketch → Upload Using Programmer** (`Ctrl+Shift+U`)
 4. Open **Serial Monitor** (`Ctrl+Shift+M`)
