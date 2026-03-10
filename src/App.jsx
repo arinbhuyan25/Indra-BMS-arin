@@ -7,6 +7,9 @@ import {
   Tooltip, ReferenceLine, ResponsiveContainer, Area, AreaChart
 } from "recharts";
 import { useSerial } from "./useSerial";
+import NASADataExplorer from "./NASADataExplorer";
+import InfoButton from "./InfoButton";
+import nasaData from "./nasa_mock_data.json";
 import "./App.css";
 
 // --- DATA SIMULATION ---
@@ -271,21 +274,25 @@ export default function App() {
 
       // Only simulate if not getting real data
       if (!connected || telemetry.busV === null) {
-        setVoltage(v => parseFloat((v + (Math.random() - 0.5) * 0.02).toFixed(2)));
-      }
-      if (!connected || telemetry.current === null) {
-        setCurrent(c => parseFloat((c + (Math.random() - 0.5) * 0.3).toFixed(1)));
-      }
-      if (!connected) setBytesSent(b => b + 50);
+        // NASA Validated Simulation Fallback
+        const mockIdx = Math.floor(t / 10) % nasaData.length;
+        const rootNasa = nasaData[mockIdx];
 
-      if (t % 6 === 0 && (!connected || telemetry.cellTemp === null)) {
-        const simTemp = 26.5 + Math.sin(t / 20) * 2;
-        setCells(generateCells(simTemp));
+        // Emulate live voltage/current swing 
+        setVoltage(parseFloat((3.0 + (t % 12) * 0.1 + (Math.random() - 0.5) * 0.05).toFixed(2)));
+        setCurrent(parseFloat(((t % 12 < 6 ? 1.5 : -2.0) + (Math.random() - 0.5) * 0.2).toFixed(1)));
+
+        if (t % 5 === 0) {
+          setSoh(rootNasa.soh);
+          setCycle(rootNasa.cycle);
+          setDqdvData(generateDQDV(rootNasa.cycle, platingDetected));
+        }
+        if (t % 6 === 0) {
+          setCells(generateCells(rootNasa.peak_temp));
+        }
       }
-      if (t % 10 === 0) {
-        setDqdvData(generateDQDV(cycle, platingDetected));
-        setSoh(s => parseFloat((s - 0.01 + Math.random() * 0.005).toFixed(2)));
-      }
+
+      if (!connected) setBytesSent(b => b + 50);
     }, 1000);
     return () => clearInterval(interval);
   }, [cycle, platingDetected, connected, telemetry]);
@@ -370,6 +377,7 @@ export default function App() {
           { id: "overview", label: "OVERVIEW", icon: "◎" },
           { id: "analytics", label: "DEEP-DIVE ANALYTICS", icon: "◈" },
           { id: "projection", label: "DIGITAL TWIN", icon: "◇" },
+          { id: "nasa", label: "NASA DATA EXPLORER", icon: "⎈" },
         ].map(tab => (
           <button
             key={tab.id}
@@ -413,27 +421,32 @@ export default function App() {
         <ProjectionPage soh={soh} cycle={cycle} voltage={voltage} current={current} connected={connected} />
       )}
 
+      {page === "nasa" && (
+        <NASADataExplorer />
+      )}
+
       {page === "overview" && (
         <>
           {/* METRIC CARDS ROW */}
           <div className="metric-row">
-            <div className="metric-card">
+            <div className="metric-card" style={{ opacity: connected ? 0.4 : 1, filter: connected ? "grayscale(100%)" : "none" }}>
               <div className="metric-top">
-                <span className="metric-label">STATE OF HEALTH</span>
+                <span className="metric-label">STATE OF HEALTH <InfoButton infoKey="soh" /></span>
                 <span className="metric-icon" style={{ color: "var(--accent-green)" }}>♥</span>
               </div>
               <div className="metric-bottom">
-                <span className="metric-value" style={{ color: sohColor }}>{soh.toFixed(1)}%</span>
-                <span className="metric-trend negative">▼ 0.1%</span>
+                <span className="metric-value" style={{ color: sohColor }}>{connected ? "--" : soh.toFixed(1)}%</span>
+                {!connected && <span className="metric-trend negative">▼ 0.1%</span>}
               </div>
               <div className="metric-bar-track">
                 <div className="metric-bar-fill" style={{ width: `${soh}%`, background: sohColor }} />
               </div>
+              {connected && <div style={{ fontSize: 9, color: "var(--accent-yellow)", marginTop: 6 }}>Awaiting Edge ML Sync</div>}
             </div>
 
             <div className="metric-card">
               <div className="metric-top">
-                <span className="metric-label">PACK VOLTAGE</span>
+                <span className="metric-label">PACK VOLTAGE <InfoButton infoKey="packVoltage" /></span>
                 <span className="metric-icon" style={{ color: "var(--accent-cyan)" }}>⚡</span>
               </div>
               <div className="metric-bottom">
@@ -444,7 +457,7 @@ export default function App() {
 
             <div className="metric-card">
               <div className="metric-top">
-                <span className="metric-label">TEST MODE</span>
+                <span className="metric-label">TEST MODE <InfoButton infoKey="testMode" /></span>
                 <span className="metric-icon" style={{ color: "var(--accent-yellow)" }}>⚙</span>
               </div>
               <div className="metric-bottom">
@@ -458,7 +471,7 @@ export default function App() {
 
             <div className="metric-card">
               <div className="metric-top">
-                <span className="metric-label">PEAK POS ERROR</span>
+                <span className="metric-label">PEAK POS ERROR <InfoButton infoKey="peakPosError" /></span>
                 <span className="metric-icon" style={{ color: "var(--text-secondary)" }}>⊕</span>
               </div>
               <div className="metric-bottom">
@@ -469,7 +482,7 @@ export default function App() {
 
             <div className="metric-card">
               <div className="metric-top">
-                <span className="metric-label">THERMAL NORM</span>
+                <span className="metric-label">THERMAL NORM <InfoButton infoKey="thermalNorm" /></span>
                 <span className="metric-icon" style={{ color: "var(--accent-red)" }}>🌡</span>
               </div>
               <div className="metric-bottom">
@@ -485,8 +498,8 @@ export default function App() {
             </div>
 
             {/* 2. RUL CARD */}
-            <div className="card">
-              <div className="card-title green">Remaining Useful Life</div>
+            <div className="card" style={{ opacity: connected ? 0.4 : 1, filter: connected ? "grayscale(100%)" : "none", pointerEvents: connected ? "none" : "auto" }}>
+              <div className="card-title green" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Remaining Useful Life <InfoButton infoKey="rul" /></div>
               <div className="soh-container">
                 <div className="gauge-wrapper">
                   <svg className="gauge-svg" width="160" height="160" viewBox="0 0 160 160">
@@ -498,18 +511,18 @@ export default function App() {
                       style={{ filter: "drop-shadow(0 0 8px var(--accent-cyan))", transition: "stroke-dashoffset 1s ease" }} />
                   </svg>
                   <div className="gauge-value">
-                    <div className="gauge-number" style={{ color: "var(--accent-cyan)", fontSize: 26 }}>{Math.round((soh - 70) * 56)}</div>
+                    <div className="gauge-number" style={{ color: "var(--accent-cyan)", fontSize: 26 }}>{connected ? "--" : Math.round((soh - 70) * 56)}</div>
                     <div className="gauge-unit">cycles left</div>
                   </div>
                 </div>
                 <div className="soh-label">ESTIMATED RUL</div>
-                <div className="soh-status good">CELL: BATT-883-X</div>
+                <div className="soh-status good">{connected ? "Model Offline" : "CELL: BATT-883-X"}</div>
               </div>
             </div>
 
             {/* 3. LIVE STATS */}
             <div className="card">
-              <div className="card-title cyan">Live Telemetry</div>
+              <div className="card-title cyan" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Live Telemetry <InfoButton infoKey="liveTelemetry" /></div>
               <div className="stats-row">
                 <div className="stat-item">
                   <span className="stat-label">PACK VOLTAGE</span>
@@ -535,7 +548,7 @@ export default function App() {
 
             {/* 4. BANDWIDTH SAVINGS */}
             <div className="card">
-              <div className="card-title green">Edge-Native Bandwidth</div>
+              <div className="card-title green" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Edge-Native Bandwidth <InfoButton infoKey="bandwidthSavings" /></div>
               <div className="bandwidth-display">
                 <div className="bw-row">
                   <span className="bw-label">RAW (cloud)</span>
@@ -555,7 +568,7 @@ export default function App() {
 
             {/* 5. DEGRADATION ALERTS */}
             <div className="card">
-              <div className="card-title red">Degradation Classifier</div>
+              <div className="card-title red" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Degradation Classifier <InfoButton infoKey="degradationClassifier" /></div>
               <div className="alert-list">
                 {alerts.map((a, i) => (
                   <div key={i} className={`alert-item ${a.type}`}>
@@ -571,7 +584,7 @@ export default function App() {
 
             {/* 7. CYCLE HISTORY — spans 3 cols */}
             <div className="card span-3">
-              <div className="card-title cyan">Charge Cycle History — SoH Trend</div>
+              <div className="card-title cyan" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Charge Cycle History — SoH Trend <InfoButton infoKey="cycleHistory" /></div>
               <div style={{ width: "100%", height: 160 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={cycleHistory} margin={{ top: 8, right: 16, left: 8, bottom: 28 }}>

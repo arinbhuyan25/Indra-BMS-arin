@@ -3,6 +3,7 @@ import {
     PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
+import InfoButton from "./InfoButton";
 
 // ── Degradation simulation from SoH ──────────────────────────
 function computeDegradation(soh) {
@@ -78,7 +79,7 @@ export default function AnalyticsPage({ soh }) {
 
                 {/* Donut chart */}
                 <div className="card">
-                    <div className="card-title cyan">Degradation Mode Breakdown</div>
+                    <div className="card-title cyan" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Degradation Mode Breakdown <InfoButton infoKey="degradationBreakdown" /></div>
                     <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
                         <div style={{ width: "100%", maxWidth: 260, minWidth: 180, height: 240, margin: "0 auto" }}>
                             <ResponsiveContainer width="100%" height="100%">
@@ -147,7 +148,7 @@ export default function AnalyticsPage({ soh }) {
 
                 {/* Peak shift bar chart */}
                 <div className="card">
-                    <div className="card-title orange">Peak Voltage Shift Analysis</div>
+                    <div className="card-title orange" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Peak Voltage Shift Analysis <InfoButton infoKey="peakShiftAnalysis" /></div>
                     <div className="bar-chart-wrap">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={peaks} margin={{ top: 8, right: 16, left: 8, bottom: 28 }}>
@@ -190,7 +191,7 @@ export default function AnalyticsPage({ soh }) {
 
             {/* ── ROW 2: Edge vs Cloud ROI Calculator ── */}
             <div className="card">
-                <div className="card-title green">Edge vs. Cloud — Fleet ROI Calculator</div>
+                <div className="card-title green" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Edge vs. Cloud — Fleet ROI Calculator <InfoButton infoKey="roiCalculator" /></div>
 
                 <div className="roi-grid">
                     {/* ── Sliders ── */}

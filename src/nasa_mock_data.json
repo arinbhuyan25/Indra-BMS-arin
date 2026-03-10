@@ -1,0 +1,119 @@
+[
+    {
+        "cycle": 1,
+        "capacity": 2.21,
+        "soh": 100.0,
+        "peak_temp": 32.4,
+        "efficiency": 99.8,
+        "charge_time": 8400,
+        "discharge_time": 4600
+    },
+    {
+        "cycle": 15,
+        "capacity": 2.18,
+        "soh": 98.6,
+        "peak_temp": 32.7,
+        "efficiency": 99.6,
+        "charge_time": 8200,
+        "discharge_time": 4500
+    },
+    {
+        "cycle": 30,
+        "capacity": 2.14,
+        "soh": 96.8,
+        "peak_temp": 33.1,
+        "efficiency": 99.5,
+        "charge_time": 8050,
+        "discharge_time": 4420
+    },
+    {
+        "cycle": 45,
+        "capacity": 2.09,
+        "soh": 94.5,
+        "peak_temp": 33.6,
+        "efficiency": 99.2,
+        "charge_time": 7900,
+        "discharge_time": 4300
+    },
+    {
+        "cycle": 60,
+        "capacity": 2.03,
+        "soh": 91.8,
+        "peak_temp": 34.2,
+        "efficiency": 98.9,
+        "charge_time": 7700,
+        "discharge_time": 4150
+    },
+    {
+        "cycle": 75,
+        "capacity": 1.95,
+        "soh": 88.2,
+        "peak_temp": 35.0,
+        "efficiency": 98.5,
+        "charge_time": 7450,
+        "discharge_time": 3980
+    },
+    {
+        "cycle": 90,
+        "capacity": 1.88,
+        "soh": 85.0,
+        "peak_temp": 35.8,
+        "efficiency": 98.1,
+        "charge_time": 7200,
+        "discharge_time": 3800
+    },
+    {
+        "cycle": 105,
+        "capacity": 1.82,
+        "soh": 82.3,
+        "peak_temp": 36.5,
+        "efficiency": 97.6,
+        "charge_time": 6980,
+        "discharge_time": 3650
+    },
+    {
+        "cycle": 120,
+        "capacity": 1.76,
+        "soh": 79.6,
+        "peak_temp": 37.3,
+        "efficiency": 97.0,
+        "charge_time": 6750,
+        "discharge_time": 3500
+    },
+    {
+        "cycle": 135,
+        "capacity": 1.68,
+        "soh": 76.0,
+        "peak_temp": 38.2,
+        "efficiency": 96.3,
+        "charge_time": 6500,
+        "discharge_time": 3300
+    },
+    {
+        "cycle": 150,
+        "capacity": 1.59,
+        "soh": 71.9,
+        "peak_temp": 39.4,
+        "efficiency": 95.4,
+        "charge_time": 6200,
+        "discharge_time": 3050
+    },
+    {
+        "cycle": 165,
+        "capacity": 1.48,
+        "soh": 66.9,
+        "peak_temp": 40.8,
+        "efficiency": 94.1,
+        "charge_time": 5800,
+        "discharge_time": 2800
+    },
+    {
+        "cycle": 168,
+        "capacity": 1.34,
+        "soh": 60.6,
+        "peak_temp": 42.5,
+        "efficiency": 92.5,
+        "charge_time": 5300,
+        "discharge_time": 2450
+    }
+]

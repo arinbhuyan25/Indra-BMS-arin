@@ -3,6 +3,7 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, ReferenceLine, Area, AreaChart,
 } from "recharts";
+import InfoButton from "./InfoButton";
 
 // ── Projection engine ────────────────────────────────────────
 function projectDegradation(startSoh, startCycle, totalCycles = 500) {
@@ -156,8 +157,9 @@ export default function ProjectionPage({ soh, cycle, voltage, current, connected
             {/* ── ROW 2: SoH Projection Chart ── */}
             <div className="card">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                    <div className="card-title cyan" style={{ margin: 0 }}>
+                    <div className="card-title cyan" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                         Projected State of Health {animData.length > 0 ? `— ${animData.length} / 500 cycles` : ""}
+                        <InfoButton infoKey="projSoh" />
                     </div>
                     {eol && (
                         <div style={{
@@ -218,7 +220,7 @@ export default function ProjectionPage({ soh, cycle, voltage, current, connected
 
             {/* ── ROW 3: Peak Migration ── */}
             <div className="card">
-                <div className="card-title orange">Projected dQ/dV Peak Migration Over Aging</div>
+                <div className="card-title orange" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Projected dQ/dV Peak Migration Over Aging <InfoButton infoKey="projPeakMigration" /></div>
                 <div style={{ width: "100%", height: 220 }}>
                     {peakData ? (
                         <ResponsiveContainer width="100%" height="100%">
