@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
-    PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
-    BarChart, Bar, XAxis, YAxis, CartesianGrid,
+    PieChart, Pie, Cell, ResponsiveContainer,
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts";
 import InfoButton from "./InfoButton";
 
@@ -41,6 +41,7 @@ export default function AnalyticsPage({ soh }) {
     const peaks = generatePeakShifts(soh);
     const pieData = MODES.map(m => ({ name: m.label, value: deg[m.key] }));
 
+    const [hoveredSlice, setHoveredSlice] = useState(null);
     const [fleetSize, setFleetSize] = useState(1000);
     const [costPerGB, setCostPerGB] = useState(0.08);
     const usdToInr = 83;
@@ -81,7 +82,7 @@ export default function AnalyticsPage({ soh }) {
                 <div className="card">
                     <div className="card-title cyan" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>Degradation Mode Breakdown <InfoButton infoKey="degradationBreakdown" /></div>
                     <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                        <div style={{ width: "100%", maxWidth: 260, minWidth: 180, height: 240, margin: "0 auto" }}>
+                        <div style={{ width: "100%", maxWidth: 260, minWidth: 180, height: 240, margin: "0 auto", position: "relative" }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <defs>
@@ -91,21 +92,52 @@ export default function AnalyticsPage({ soh }) {
                                     </defs>
                                     <Pie
                                         data={pieData} dataKey="value" nameKey="name"
-                                        cx="50%" cy="50%" outerRadius={85} innerRadius={48}
+                                        cx="50%" cy="50%" outerRadius={95} innerRadius={54}
                                         paddingAngle={3} strokeWidth={0}
-                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                        labelLine={{ stroke: "#4a6a8a", strokeWidth: 1 }}
+                                        isAnimationActive={true}
+                                        onMouseEnter={(_, i) => setHoveredSlice(i)}
+                                        onMouseLeave={() => setHoveredSlice(null)}
                                     >
                                         {pieData.map((_, i) => (
-                                            <Cell key={i} fill={PIE_COLORS[i]} style={{ filter: `url(#glow-${i})` }} />
+                                            <Cell
+                                                key={i}
+                                                fill={PIE_COLORS[i]}
+                                                style={{
+                                                    filter: `url(#glow-${i})`,
+                                                    cursor: "pointer",
+                                                    opacity: hoveredSlice === null || hoveredSlice === i ? 1 : 0.45,
+                                                    transition: "opacity 0.2s",
+                                                }}
+                                            />
                                         ))}
                                     </Pie>
-                                    <Tooltip
-                                        contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border-bright)", borderRadius: 8, fontSize: 11, fontFamily: "'Plus Jakarta Sans'" }}
-                                        formatter={v => [`${v.toFixed(2)}%`, "Capacity Fade"]}
-                                    />
                                 </PieChart>
                             </ResponsiveContainer>
+
+                            {/* Custom hover tooltip — rendered in DOM, never blank */}
+                            {hoveredSlice !== null && (() => {
+                                const mode  = MODES[hoveredSlice];
+                                const value = deg[mode.key];
+                                const pct   = deg.total > 0 ? ((value / deg.total) * 100).toFixed(0) : 0;
+                                return (
+                                    <div style={{
+                                        position: "absolute", bottom: 0, left: "50%",
+                                        transform: "translateX(-50%)",
+                                        background: "#0d1428",
+                                        border: `1px solid ${mode.color}55`,
+                                        borderRadius: 8, padding: "8px 14px",
+                                        fontSize: 11, pointerEvents: "none",
+                                        whiteSpace: "nowrap", zIndex: 10,
+                                        boxShadow: `0 4px 20px rgba(0,0,0,0.5)`,
+                                    }}>
+                                        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: 9, letterSpacing: 2, color: mode.color, marginBottom: 3 }}>
+                                            {mode.label} — {pct}%
+                                        </div>
+                                        <div style={{ color: "#e8f4fd", fontWeight: 600 }}>{value.toFixed(2)}% capacity fade</div>
+                                        <div style={{ color: "#7a9bbf", fontSize: 10, marginTop: 2 }}>{mode.full}</div>
+                                    </div>
+                                );
+                            })()}
                         </div>
 
                         {/* Centre stats */}

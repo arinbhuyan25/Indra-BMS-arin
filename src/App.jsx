@@ -241,7 +241,7 @@ export default function App() {
   const [soh, setSoh] = useState(87.4);
   const [cycle, setCycle] = useState(312);
   const [voltage, setVoltage] = useState(3.71);
-  const [current, setCurrent] = useState(18.4);
+  const [current, setCurrent] = useState(1.82);
   const [platingDetected, setPlatingDetected] = useState(true);
   const [bytesSent, setBytesSent] = useState(2048);
   const [time, setTime] = useState(new Date());
@@ -272,24 +272,24 @@ export default function App() {
 
       setTime(new Date());
 
-      // Only simulate if not getting real data
+      // Voltage: gentle random walk, clamped to realistic cell range
       if (!connected || telemetry.busV === null) {
-        // NASA Validated Simulation Fallback
-        const mockIdx = Math.floor(t / 10) % nasaData.length;
-        const rootNasa = nasaData[mockIdx];
-
-        // Emulate live voltage/current swing 
-        setVoltage(parseFloat((3.0 + (t % 12) * 0.1 + (Math.random() - 0.5) * 0.05).toFixed(2)));
-        setCurrent(parseFloat(((t % 12 < 6 ? 1.5 : -2.0) + (Math.random() - 0.5) * 0.2).toFixed(1)));
-
-        if (t % 5 === 0) {
-          setSoh(rootNasa.soh);
-          setCycle(rootNasa.cycle);
-          setDqdvData(generateDQDV(rootNasa.cycle, platingDetected));
-        }
-        if (t % 6 === 0) {
-          setCells(generateCells(rootNasa.peak_temp));
-        }
+        setVoltage(v => parseFloat(Math.min(4.20, Math.max(3.00, v + (Math.random() - 0.5) * 0.02)).toFixed(2)));
+      }
+      // Current: gentle random walk, clamped to 0.5–2.5 A (always positive — sim is discharge)
+      if (!connected || telemetry.current === null) {
+        setCurrent(c => parseFloat(Math.min(2.5, Math.max(0.5, c + (Math.random() - 0.5) * 0.05)).toFixed(2)));
+      }
+      // Temp: slow sine drift, updates every 6 ticks
+      if (t % 6 === 0 && (!connected || telemetry.cellTemp === null)) {
+        const simTemp = 26.5 + Math.sin(t / 20) * 2;
+        setCells(generateCells(simTemp));
+      }
+      // SOH: very slow decay matching real aging rate (~0.01% per tick = ~1% per 100 cycles)
+      // DQ/dV: refresh every 10 ticks
+      if (t % 10 === 0) {
+        setDqdvData(generateDQDV(cycle, platingDetected));
+        setSoh(s => parseFloat(Math.max(70, s - 0.01 + Math.random() * 0.005).toFixed(2)));
       }
 
       if (!connected) setBytesSent(b => b + 50);
@@ -511,7 +511,7 @@ export default function App() {
                       style={{ filter: "drop-shadow(0 0 8px var(--accent-cyan))", transition: "stroke-dashoffset 1s ease" }} />
                   </svg>
                   <div className="gauge-value">
-                    <div className="gauge-number" style={{ color: "var(--accent-cyan)", fontSize: 26 }}>{connected ? "--" : Math.round((soh - 70) * 56)}</div>
+                    <div className="gauge-number" style={{ color: "var(--accent-cyan)", fontSize: 26 }}>{connected ? "--" : Math.round(Math.max(0, (soh - 70) * 56))}</div>
                     <div className="gauge-unit">cycles left</div>
                   </div>
                 </div>
