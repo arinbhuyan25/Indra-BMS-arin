@@ -1,28 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-// --- Regex parsers matching firmware output lines ---
-const PARSERS = [
-    { key: "busV", re: /Bus Voltage\s*:\s*([\d.]+)\s*V/i },
-    { key: "current", re: /Current\s*:\s*([\d.]+)\s*mA/i },
-    { key: "power", re: /Power\s*:\s*([\d.]+)\s*mW/i },
-    { key: "battV", re: /Batt(?:ery)?\s*V(?:oltage)?\s*:\s*([\d.]+)\s*V/i },
-    { key: "cellTemp", re: /Cell Temp\s*:\s*([\d.\-]+)\s*C/i },
-];
-
-function parseLine(line) {
-    for (const { key, re } of PARSERS) {
-        const m = line.match(re);
-        if (m) return { key, value: parseFloat(m[1]) };
-    }
-    return null;
-}
-
 export function useSerial() {
     const [connected, setConnected] = useState(false);
     const [error, setError] = useState(null);
     const [telemetry, setTelemetry] = useState({
         busV: null, current: null, power: null,
-        battV: null, cellTemp: null,
+        battV: null, cellTemp: null, cycle: null, soc: null, health: null
     });
 
     const portRef = useRef(null);
@@ -36,7 +19,14 @@ export function useSerial() {
         }
         try {
             const port = await navigator.serial.requestPort();
-            await port.open({ baudRate: 115200 });
+            await port.open({
+                baudRate: 115200,
+                dataBits: 8,
+                stopBits: 1,
+                parity: "none",
+                flowControl: "none",
+                bufferSize: 8192 // Fixes allocation issues on some Windows CH340 drivers
+            });
             portRef.current = port;
             abortRef.current = false;
             setConnected(true);
@@ -57,9 +47,30 @@ export function useSerial() {
                 const lines = buffer.split("\n");
                 buffer = lines.pop(); // incomplete last line stays in buffer
                 for (const raw of lines) {
-                    const parsed = parseLine(raw.trim());
-                    if (parsed) {
-                        setTelemetry(prev => ({ ...prev, [parsed.key]: parsed.value }));
+                    const line = raw.trim();
+                    // Basic JSON check
+                    if (line.startsWith("{") && line.endsWith("}")) {
+                        try {
+                            const parsed = JSON.parse(line);
+                            // We only want the telemetry broadcast, ignore event objects
+                            if (parsed.busV !== undefined) {
+                                setTelemetry(prev => ({
+                                    ...prev,
+                                    busV: parsed.busV,
+                                    current: parsed.current,
+                                    power: parsed.power,
+                                    battV: parsed.divV,
+                                    cellTemp: parsed.cellTemp,
+                                    cycle: parsed.cycle,
+                                    soc: parsed.soc,
+                                    health: parsed.health,
+                                    peakV: parsed.peakV,
+                                    mAh: parsed.mAh
+                                }));
+                            }
+                        } catch (e) {
+                            // Ignored - partial or malformed chunk
+                        }
                     }
                 }
             }
@@ -78,7 +89,7 @@ export function useSerial() {
         portRef.current = null;
         readerRef.current = null;
         setConnected(false);
-        setTelemetry({ busV: null, current: null, power: null, battV: null, cellTemp: null });
+        setTelemetry({ busV: null, current: null, power: null, battV: null, cellTemp: null, cycle: null, soc: null, health: null });
     }, []);
 
     // Cleanup on unmount

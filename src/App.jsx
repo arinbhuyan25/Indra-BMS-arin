@@ -242,6 +242,8 @@ export default function App() {
   const [cycle, setCycle] = useState(312);
   const [voltage, setVoltage] = useState(3.71);
   const [current, setCurrent] = useState(1.82);
+  const [coulombAuth, setCoulombAuth] = useState(0);
+  const [livePeak, setLivePeak] = useState(3.45);
   const [platingDetected, setPlatingDetected] = useState(true);
   const [bytesSent, setBytesSent] = useState(2048);
   const [time, setTime] = useState(new Date());
@@ -260,8 +262,21 @@ export default function App() {
       const t = telemetry.cellTemp;
       setCells(generateCells(t));
     }
-    // Every new reading counts as live bytes
-    setBytesSent(b => b + 24);
+    if (telemetry.cycle !== null && telemetry.cycle !== undefined) {
+      setCycle(telemetry.cycle);
+    }
+    if (telemetry.soc !== null && telemetry.soc !== undefined) {
+      // Temporarily use the SOH dial to show hardware-estimated SOC if we want, or at least keep it updating
+      setSoh(parseFloat(telemetry.soc.toFixed(1)));
+    }
+    if (telemetry.mAh !== null && telemetry.mAh !== undefined) {
+      setCoulombAuth(telemetry.mAh);
+    }
+    if (telemetry.peakV !== null && telemetry.peakV !== undefined) {
+      if (telemetry.peakV > 3.0) setLivePeak(telemetry.peakV);
+    }
+    // A typical Indra-BMS v0.5 JSON string is exactly 126 bytes
+    setBytesSent(b => b + 126);
   }, [telemetry, connected]);
 
   // --- Simulation loop (runs always; serial values win via override above) ---
@@ -300,7 +315,7 @@ export default function App() {
   const rawEquivalent = bytesSent * 200;
   const saving = (((rawEquivalent - bytesSent) / rawEquivalent) * 100).toFixed(1);
 
-  const alerts = [
+  const baseAlerts = [
     platingDetected
       ? { type: "critical", msg: "Lithium Plating detected — Peak shift @ 3.44V" }
       : null,
@@ -310,6 +325,10 @@ export default function App() {
     { type: "warning", msg: "Loss of Lithium Inventory — Li⁺ trapped in SEI layer" },
     { type: "nominal", msg: "Electrolyte decomposition — within threshold" },
   ].filter(Boolean);
+
+  const alerts = connected && telemetry.health
+    ? [{ type: telemetry.health === "OK" ? "nominal" : "critical", msg: `Hardware Status: ${telemetry.health}` }, ...baseAlerts]
+    : baseAlerts;
 
   const sohColor = soh > 90 ? "var(--accent-green)" : soh > 80 ? "var(--accent-yellow)" : "var(--accent-orange)";
   const circumference = 2 * Math.PI * 68;
@@ -457,27 +476,29 @@ export default function App() {
 
             <div className="metric-card">
               <div className="metric-top">
-                <span className="metric-label">TEST MODE <InfoButton infoKey="testMode" /></span>
+                <span className="metric-label">INTEGRATED CAPACITY <InfoButton infoKey="testMode" /></span>
                 <span className="metric-icon" style={{ color: "var(--accent-yellow)" }}>⚙</span>
               </div>
               <div className="metric-bottom">
-                <span className="metric-value" style={{ fontSize: 16 }}>Constant Current</span>
+                <span className="metric-value">{connected ? Math.abs(coulombAuth).toFixed(1) : "328.4"} <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>mAh</span></span>
               </div>
               <div className="metric-sub">
-                <span className="live-dot" style={{ width: 6, height: 6, display: "inline-block", marginRight: 6, borderRadius: "50%", background: "var(--accent-green)", animation: "pulse 1.5s infinite" }} />
-                Active
+                <span className="live-dot" style={{ width: 6, height: 6, display: "inline-block", marginRight: 6, borderRadius: "50%", background: connected ? "var(--accent-green)" : "var(--accent-yellow)", animation: "pulse 1.5s infinite" }} />
+                {connected ? "Coulomb Count (Edge)" : "Const_Current Sim"}
               </div>
             </div>
 
             <div className="metric-card">
               <div className="metric-top">
-                <span className="metric-label">PEAK POS ERROR <InfoButton infoKey="peakPosError" /></span>
+                <span className="metric-label">LIVE dQ/dV PEAK <InfoButton infoKey="peakPosError" /></span>
                 <span className="metric-icon" style={{ color: "var(--text-secondary)" }}>⊕</span>
               </div>
               <div className="metric-bottom">
-                <span className="metric-value cyan">0.015 <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>V</span></span>
+                <span className="metric-value cyan">{connected ? livePeak.toFixed(3) : "3.440"} <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>V</span></span>
               </div>
-              <div className="metric-sub" style={{ color: "var(--accent-green)" }}>Within Tolerance</div>
+              <div className="metric-sub" style={{ color: connected && livePeak < 3.42 ? "var(--accent-orange)" : "var(--accent-green)" }}>
+                {connected && livePeak < 3.42 ? "Peak Shift Warning!" : "Within Tolerance"}
+              </div>
             </div>
 
             <div className="metric-card">
