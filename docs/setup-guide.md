@@ -12,14 +12,14 @@
 | **Communication** | 4×SPI, 3×I²C, 3×UART, 4-ch 12-bit ADC            |
 | **Boot Modes**    | UART (XMODEM) / QSPI Flash (via BOOT SEL jumper)  |
 
----
+
 
 ## Step 1 — Install Arduino IDE
 
 - Download **Arduino IDE 2.x** (2.3.x or later recommended) from [arduino.cc](https://www.arduino.cc/en/software)
 - Install and launch
 
----
+
 
 ## Step 2 — Add Board Manager URL
 
@@ -35,7 +35,7 @@ https://gitlab.com/riscv-vega/vega-arduino/-/raw/main/package_vega_index.json
 
 4. Click **OK**
 
----
+
 
 ## Step 3 — Install VEGA ARIES Board Package
 
@@ -44,7 +44,7 @@ https://gitlab.com/riscv-vega/vega-arduino/-/raw/main/package_vega_index.json
 3. Install **"VEGA ARIES Boards"** by C-DAC
 4. Wait for installation to complete
 
----
+
 
 ## Step 4 — Install CP2102N USB Driver (if needed)
 
@@ -56,12 +56,12 @@ If COM11 does not appear:
 3. Reconnect the board via USB-C
 4. Verify in **Device Manager → Ports (COM & LPT)** that `COM11` appears
 
----
+
 
 ## Step 5 — Configure Arduino IDE (CRITICAL)
 
 ### Board Selection
-> ⚠️ **The board appears as "ARIES v3" in the menu, NOT "VSDSquadron ULTRA"**
+> **The board appears as "ARIES v3" in the menu, NOT "VSDSquadron ULTRA"**
 
 1. **Board:** `Tools → Board → VEGA Processor: ARIES Boards → ARIES v3`
 2. **Port:** `Tools → Port → COM11`
@@ -86,11 +86,11 @@ If COM11 does not appear:
 | Programmer     | `VEGA FLASHER`  |
 | Upload method  | **Upload Using Programmer** (`Sketch → Upload Using Programmer`) |
 
----
+
 
 ## Step 6 — Upload & Verify
 
-1. Open the sketch: `firmware/indra_bms_serial_test/indra_bms_serial_test.ino`
+1. Open the sketch: `firmware/indra_bms_circuit_test/indra_bms_serial_test.ino`
 2. **If using XMODEM:** Click **Upload** (→ button) or `Ctrl+U`
 3. **If using FLASHER:** Use **Sketch → Upload Using Programmer** (`Ctrl+Shift+U`)
 4. Open **Serial Monitor** (`Ctrl+Shift+M`)
@@ -98,7 +98,7 @@ If COM11 does not appear:
 6. Set line ending to **Newline** (NL)
 7. Type `ping` and hit Enter → should see `pong`
 
----
+
 
 ## Troubleshooting
 

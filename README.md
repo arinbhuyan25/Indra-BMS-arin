@@ -4,7 +4,7 @@
 
 Indra-BMS is a real-time Battery Management System that runs fully on the edge. It uses **differential capacity analysis (dQ/dV)** with a **Savitzky–Golay filter** to detect lithium plating, SEI growth, and loss of active material — directly on the VSDSquadron ULTRA board, with no cloud dependency.
 
----
+
 
 ## Hardware Setup
 
@@ -19,14 +19,14 @@ Indra-BMS is a real-time Battery Management System that runs fully on the edge. 
 
 Full wiring diagram: [`docs/FULL BREADBOARD WIRING SUMMARY.md`](docs/FULL%20BREADBOARD%20WIRING%20SUMMARY.md)
 
----
+
 
 ## Flashing the Firmware
 
 ### Option A — Arduino IDE (GUI)
 Follow [`docs/setup-guide.md`](docs/setup-guide.md) to install the VEGA board package and upload via **Sketch → Upload**.
 
-### Option B — `arduino-cli` (No IDE required ✅)
+### Option B — `arduino-cli` (No IDE required)
 
 #### One-time setup
 ```powershell
@@ -56,7 +56,7 @@ arduino-cli upload --fqbn vega:riscv:aries_v3 --port COM11 --programmer vegaxmod
 
 > **Tip:** Use `arduino-cli board list` to confirm which COM port the board is on.
 
----
+
 
 ## Running the Dashboard
 
@@ -72,7 +72,7 @@ npm run dev
 
 Open **`http://localhost:5173`** in Chrome or Edge.
 
----
+
 
 ## Connecting the Board to the Dashboard (Live Telemetry)
 
@@ -88,7 +88,7 @@ The dashboard uses the **Web Serial API** — a direct browser-to-hardware USB c
 
 > **Note:** Firefox does not support Web Serial API. Use Chrome or Edge.
 
----
+
 
 ## Dashboard Features
 
@@ -104,7 +104,7 @@ The dashboard uses the **Web Serial API** — a direct browser-to-hardware USB c
 | **Degradation Classifier** | Peak-shift detection (Lithium Plating, LAM, LLI) | Live |
 | **Edge-Native Bandwidth** | Bytes sent vs. raw equivalent | Live |
 
----
+
 
 ## Project Structure
 
@@ -128,7 +128,7 @@ EV-BIC/
 └── package.json
 ```
 
----
+
 
 ## Tech Stack
 
@@ -140,3 +140,8 @@ EV-BIC/
 | Hardware bridge | Web Serial API |
 | Firmware | C++ (Arduino / THEJAS32 RISC-V) |
 | Signal processing | Savitzky–Golay filter (5-point, order 2) |
+
+
+
+## Live Demo
+[Indra-BMS](https://indrabms.netlify.app/)
